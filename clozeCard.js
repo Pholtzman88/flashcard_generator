@@ -1,8 +1,7 @@
 //cloze card constructor
 var ClozeCard = function(text,cloze){
-	this.partialText = text.replace(cloze, "").trim();
-	this.cloze = cloze;
-	this.fullText = text;
+	this.front = text.replace(cloze, "").trim();
+	this.back = cloze;
 };
 //export module
 module.exports = ClozeCard;

@@ -121,7 +121,7 @@ function runApp(){
 				},
 				{
 					name:"back",
-					message: "please pick the display for front of the card"+ count
+					message: "please pick the display for back of the card"+ count
 				}
 				]).then(function(answers){
 					//create new flash card object from user input
@@ -133,9 +133,9 @@ function runApp(){
 					//set index for traversing through cards array			
 					var index = count-1;
 					//set front of card in cards array	
-					var front = cardsArr[index].cloze;
+					var front = cardsArr[index].front;
 					//set back of card in cards array
-					var back = cardsArr[index].partialText;
+					var back = cardsArr[index].back;
 					if (count == 1){
 						//set up the initial connection to database
 						connection.connect(function(err) {
@@ -153,7 +153,7 @@ function runApp(){
 			//when recursion is finished interact with cards from
 			if ( count > 10){
 				readCards("cloze_cards");
-			}
+			};
 		};
 
 		function postCards(f,b,t){
@@ -169,20 +169,30 @@ function runApp(){
 		};
 
 		function readCards(t){
+			//connect to database and select table
 			connection.query("SELECT * FROM "+t, function(error,results){
 				if (error) throw error;
+				//set an array for cards retrieved from table
 				var cards = [];
+				//loop through array an results and push each card to cards array
 				for(i=0;i<results.length;i++){
 					cardFront = results[i].front;
 					cardBack = results[i].back;
 					cards.push({cardFront,cardBack});
 				};
+				//once all the cards from database have been pushed to cards array
 				if (cards.length === results.length){
+					//set length variable for the number of cards retrieved
 					var length = results.length;
+					//define recursive function to interact with cards
 					function useCards(){
+						//increase count by 1 each time function recurrs
 						cardCount++;
+						//set index variable for identifying each card
 						var index = cardCount - 1;
+						//as long as there is a card left to interact with
 						if(cardCount <= length){
+							//trigger inquirer to let user guess the answer 
 							inquirer.prompt([
 							{
 								name: "guess",
@@ -190,22 +200,25 @@ function runApp(){
 							}
 							]).then(function(answer){
 								console.log(answer.guess);
+								//give the user a response based off their input--right or wrong
 								if(answer.guess === cards[index].cardBack){
 									console.log("correct!");
 								}else{
 									console.log("sorry :( the correct answer is... " + cards[index].cardBack);
 								};
+								//trigger recursion
 								useCards();
 							});
 						};
 					};
+					//initial trigger
 					useCards();
 				};
+				//end connection
 				connection.end();
 			});
 		};		
 	});
 };
-
 
 runApp();
